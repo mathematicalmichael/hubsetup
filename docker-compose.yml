@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  # Configuration for Hub+Proxy
+  jupyterhub:
+    build: jupyterhub                # Build the container from this folder.
+    container_name: jupyterhub_hub   # The service will use this container name.
+    volumes:                         # Give access to Docker socket.
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:                     # Env variables passed to the Hub process.
+      DOCKER_JUPYTER_IMAGE: jupyter/datascience-notebook:7254cdcfa22b
+      DOCKER_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_default
+      HUB_IP: jupyterhub_hub
+    labels:                          # Traefik configuration.
+      - "traefik.enable=true"
+      - "traefik.frontend.rule=Host:132.194.174.243"
+
+  # Configuration for reverse proxy
+  reverse-proxy:
+    image: traefik
+    ports:
+      - "80:80"
+      - "443:443"
+      - "8080:8080"
+    volumes:
+      - ./reverse-proxy/traefik.toml:/etc/traefik/traefik.toml
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/certs/:/etc/certs/
+
+  # Configuration for the single-user servers
+  jupyterlab:
+    build: jupyterlab
+    image: jupyterlab_img
+    volumes:
+        - $PWD:/home/jovyan/work
+    command: echo
+
+networks:
+  jupyter:
+    internal: true
