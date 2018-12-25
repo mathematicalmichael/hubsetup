@@ -17,7 +17,7 @@ notebook_dir = os.environ.get('DOCKER_NOTEBOOK_DIR') or '/home/jovyan'
 #notebook_dir= '~/'
 c.DockerSpawner.notebook_dir = notebook_dir
 c.DockerSpawner.volumes = { 'jupyterhub-user-{username}': notebook_dir }
-# c.LocalAuthenticator.create_system_users = True
+c.LocalAuthenticator.create_system_users = True
 
 # our user list
 c.Authenticator.whitelist = [
